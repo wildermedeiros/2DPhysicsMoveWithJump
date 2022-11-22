@@ -8,11 +8,15 @@ public class Player : MonoBehaviour
 {
     [SerializeField] float walkForce = 200f;
     [SerializeField] float jumpForce = 50f;
+    [SerializeField] float torqueJump = 10f;
     [SerializeField] float fallGravity = 10f;  
     [SerializeField] LayerMask groundLayerMask;
     bool jumpRequested = false;
     Vector2 axisValues;
     Rigidbody2D myRigidbody2D;
+    
+    float tempTime = Mathf.Infinity;
+    float timePadding = 0.5f;
 
     private void Awake() 
     {
@@ -29,11 +33,19 @@ public class Player : MonoBehaviour
         // }
 
         ApplyIntensityOnFallJump();
+
+        // tempTime += Time.fixedDeltaTime;
+
+        // if (tempTime >= timePadding)
+        // {
+        //     tempTime = 0f;
+        //     print("Temp Check");
+        // }
     }
 
     private bool Grounded()
     {
-        if (Physics2D.IsTouchingLayers(GetComponent<BoxCollider2D>(), groundLayerMask))
+        if (Physics2D.IsTouchingLayers(GetComponentInChildren<BoxCollider2D>(), groundLayerMask))
         {
             return true;
         }
@@ -47,7 +59,7 @@ public class Player : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.started)
         {
             Jump();
             //jumpRequested = true;
@@ -58,7 +70,7 @@ public class Player : MonoBehaviour
     {
         if (myRigidbody2D.velocity.y < -0.01f)
         {
-            myRigidbody2D.gravityScale = fallGravity * Time.fixedDeltaTime;
+            myRigidbody2D.gravityScale = fallGravity;
         }
         else
         {
@@ -79,8 +91,9 @@ public class Player : MonoBehaviour
     {
         if (Grounded())
         {
-            myRigidbody2D.velocity = Vector2.up * jumpForce * Time.fixedDeltaTime;
-            jumpRequested = false;
+            myRigidbody2D.velocity = Vector2.up * jumpForce;
+            myRigidbody2D.AddTorque(-torqueJump, ForceMode2D.Force);
+            //jumpRequested = false;
         }
 
         // if(jumpRequested)
